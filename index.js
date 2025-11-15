@@ -1,11 +1,11 @@
 
-let x = 50;
-let y = 50;
+let snakeX = 50;
+let snakeY = 50;
 let foodRadius = 10;
 let score = 0;
-let speed = 25;
-let cubeLength = 20;
-let cubeWidth = 20;
+let snakeSpeed = 25;
+let snakeLength = 20;
+let snakeWidth = 20;
 let downPressed = false;
 let upPressed = false;
 let leftPressed = false;
@@ -34,10 +34,8 @@ function drawGame(){
   boundryCheck();
 }
 
-
-
 function updateScore(){
-  if(x == foodX && y == foodY){
+  if(snakeX == foodX && snakeY == foodY){
     score += 1;
     snakeParts.push([foodX, foodY]);
     foodX = Math.floor(Math.random() * total)*blockSize;
@@ -46,11 +44,11 @@ function updateScore(){
 }
 
 function boundryCheck(){
-  if(y < 0 || y > canvas.height - cubeWidth || x < 0 ||x > canvas.width - cubeWidth){
+  if(snakeY < 0 || snakeY > canvas.height - snakeWidth || snakeX < 0 ||snakeX > canvas.width - snakeWidth){
     resetGame();
   }
   for (let i = 0; i < snakeParts.length; i++) {
-    if (snakeParts[i][0] == x && snakeParts[i][1] == y) {
+    if (snakeParts[i][0] == snakeX && snakeParts[i][1] == snakeY) {
         resetGame();
     }
   }
@@ -58,8 +56,8 @@ function boundryCheck(){
 
 function resetGame(){
   alert("Game Over!" + "\nYour Score: " + score);
-  x = 50;
-  y = 50;
+  snakeX = 50;
+  snakeY = 50;
   length = 20;
   downPressed = false;
   upPressed = false;
@@ -80,33 +78,33 @@ function drawSnake(){
     snakeParts[i] = snakeParts[i - 1];
   }
   if (snakeParts.length) {
-        snakeParts[0] = [x, y];
+        snakeParts[0] = [snakeX, snakeY];
     }
   ctx.fillStyle = 'green';
   // Inputs:
   if(downPressed){
-    y += speed;
+    snakeY += snakeSpeed;
   }
   if(upPressed){
-    y -= speed;
+    snakeY -= snakeSpeed;
   }
   if(leftPressed){
-    x -= speed;
+    snakeX -= snakeSpeed;
   }
   if(rightPressed){
-    x += speed;
+    snakeX += snakeSpeed;
   }
-  ctx.fillRect(x, y, cubeLength, cubeWidth);
+  ctx.fillRect(snakeX, snakeY, snakeLength, snakeWidth);
   for (let i = 0; i < snakeParts.length; i++) {
         ctx.fillStyle = 'green';
-        ctx.fillRect(snakeParts[i][0], snakeParts[i][1], cubeLength, cubeWidth);
+        ctx.fillRect(snakeParts[i][0], snakeParts[i][1], snakeLength, snakeWidth);
 }
 }
 
 function drawFood(){
   ctx.beginPath();
   ctx.fillStyle = 'red';
-  ctx.fillRect(foodX, foodY,cubeLength, cubeWidth);
+  ctx.fillRect(foodX, foodY,snakeLength, snakeWidth);
   ctx.fill();
 }
 
