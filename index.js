@@ -23,11 +23,11 @@ window.onload = function() {
   canvas.width = blockSize * total;
   canvas.height = blockSize * total;
   ctx = canvas.getContext('2d');
+  clearScreen(0, 0, canvas.width, canvas.height);
   setInterval(drawGame, 1000/10);
 }
 
 function drawGame(){
-  clearScreen();
   drawFood();
   updateScore();
   drawSnake();
@@ -37,6 +37,7 @@ function drawGame(){
 function updateScore(){
   if(snakeX == foodX && snakeY == foodY){
     score += 1;
+    clearScreen(foodX, foodY, snakeLength, snakeWidth);
     snakeParts.push([foodX, foodY]);
     foodX = Math.floor(Math.random() * total)*blockSize;
     foodY = Math.floor(Math.random() * total)*blockSize;
@@ -65,21 +66,25 @@ function resetGame(){
   rightPressed = false;
   score = 0;
   snakeParts = [];
+  clearScreen(0, 0, canvas.width, canvas.height);
 }
 
-function clearScreen(){
+function clearScreen(xToClear, yToClear , heightToRem, WidthToRem){
 ctx.fillStyle = 'black';
-ctx.fillRect(0, 0, canvas.width, canvas.height);
+ctx.fillRect(xToClear, yToClear, heightToRem, WidthToRem);
 }
 
 function drawSnake(){
-  
+  for (let i = 0; i < snakeParts.length; i++) {
+    clearScreen(snakeParts[i][0], snakeParts[i][1], snakeLength,snakeWidth);
+  }
   for (let i = snakeParts.length - 1; i > 0; i--) {
     snakeParts[i] = snakeParts[i - 1];
   }
   if (snakeParts.length) {
         snakeParts[0] = [snakeX, snakeY];
     }
+  clearScreen(snakeX, snakeY, snakeLength, snakeWidth);
   ctx.fillStyle = 'green';
   // Inputs:
   if(downPressed){
@@ -94,8 +99,9 @@ function drawSnake(){
   if(rightPressed){
     snakeX += snakeSpeed;
   }
-  ctx.fillRect(snakeX, snakeY, snakeLength, snakeWidth);
+  ctx.fillRect(snakeX, snakeY, snakeLength, snakeWidth, snakeLength);
   for (let i = 0; i < snakeParts.length; i++) {
+        clearScreen(snakeParts[i][0], snakeParts[i][1], snakeLength, snakeWidth);
         ctx.fillStyle = 'green';
         ctx.fillRect(snakeParts[i][0], snakeParts[i][1], snakeLength, snakeWidth);
 }
