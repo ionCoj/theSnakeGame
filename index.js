@@ -15,7 +15,10 @@ let blockSize = 25;
 let total = 30;
 let foodX = (Math.floor(Math.random() * total))*blockSize;
 let foodY = (Math.floor(Math.random() * total))*blockSize;
-
+let canvas;
+let ctx;
+const userName = localStorage.getItem("userName");
+//const fs = require('fs');
 
 
 window.onload = function() {
@@ -25,6 +28,7 @@ window.onload = function() {
   ctx = canvas.getContext('2d');
   clearScreen(0, 0, canvas.width, canvas.height);
   setInterval(drawGame, 1000/10);
+  alert("welcome: " + userName);
 }
 
 function drawGame(){
@@ -142,3 +146,5 @@ function keyDown(event){
     rightPressed = false;
   }
 }
+
+
