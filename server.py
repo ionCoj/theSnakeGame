@@ -1,45 +1,114 @@
-""" import http.server
-import socketserver
-
-PORT = 8000
-
-Handler = http.server.SimpleHTTPRequestHandler
-
-with socketserver.TCPServer(("", PORT), Handler) as httpd:
-    print(f"Serving at port {PORT}")
-    httpd.serve_forever() """
-import socket
-import threading
-
-PORT = 8000
-SERVER = socket.gethostbyname(socket.gethostname())
-ADDRESS = (SERVER, PORT)
-FORMAT = "utf-8"
-HEADER = 64
-print(f"Server started at {SERVER}:{PORT}")
-filesToSend = ['signup.html', 'styles.css', 'script.js', 'index.html', 'index.css']
-
-myServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-myServer.bind(ADDRESS)
-myServer.listen()
-
-for file_name in filesToSend:
-    with open(file_name, 'rb') as file:
-        signup_page = file.read()
-        while True:
-            communication_socket, client_address = myServer.accept()
-            with communication_socket:
-                print(f"Connection established with {client_address}")
-                request = communication_socket.recv(1024)
-                communication_socket.send('HTTP/1.1 200 OK\nContent-Type: text/html\n\n'.encode())
-                communication_socket.sendall(signup_page)
-
-#def handle_client(communication_socket, client_address):
+#!/usr/bin/env python3
+"""
+License: MIT License
+Copyright (c) 2023 Miel Donkers
+Very simple HTTP server in python for logging requests
+Usage::
+    ./server.py [<port>]
+"""
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import logging
+from urllib.parse import urlparse 
+import mimetypes 
+from urllib.parse import parse_qs
+import json
 
 
 
+class S(BaseHTTPRequestHandler):
+    def _set_response(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+
+    def do_GET(self):
+        logging.info("GET request,\nPath: %s\nHeaders:\n%s\n", str(self.path), str(self.headers))
+        parsed_url = urlparse(self.path)
+        query_string = parsed_url.query
+        query_params = parse_qs(query_string)
+        print('hiiiiiii', query_params)
+        file_path = parsed_url.path[1:]
+        if file_path == "leaderboard":
+            SendDataForLeaderboard(self)
+            return
+        if not file_path:
+            file_path = "signup.html" 
+
+        # if "name" in query_params:
+        #     leadReader = open("leaderboardPart.txt", "a")
+        #     leadReader.write(str(query_params["name"][0]) + ":\n")
+        #     leadReader.close()
+        mime_type, _ = mimetypes.guess_type(file_path)
+        content_type = mime_type if mime_type else 'application/octet-stream'
+        
+        try:
+            with open(file_path, "rb") as f:
+                data = f.read()
+            self.send_response(200)
+            self.send_header('Content-type', content_type)
+            self.end_headers()
+            self.wfile.write(data)
+
+        except FileNotFoundError:
+            
+            self.send_response(404)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(f"404 Not Found: File '{file_path}' not found.".encode('utf-8'))
+
+    def do_POST(self):
+        content_length = int(self.headers['Content-Length']) # <--- Gets the size of data
+        post_data = self.rfile.read(content_length) # <--- Gets the data itself
+        logging.info("POST request,\nPath: %s\nHeaders:\n%s\n\nBody:\n%s\n",
+                str(self.path), str(self.headers), post_data.decode('utf-8'))
+        new_data = json.loads(post_data.decode('utf-8'))
+        updateLeaderboard(new_data)
+
+        
+        
+
+def run(server_class=HTTPServer, handler_class=S, port=8080):
+    logging.basicConfig(level=logging.INFO)
+    server_address = ('', port)
+    httpd = server_class(server_address, handler_class)
+    logging.info('Starting httpd...\n')
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    httpd.server_close()
+    logging.info('Stopping httpd...\n')
+
+def updateLeaderboard(data):
+    isFound = False
+    leadReader = open("leaderboard.json", "r")
+    dataToFile = json.load(leadReader)
+    for entry in dataToFile:
+        if entry["player"] == data["player"]:
+            isFound = True
+            if entry["score"] < data["score"]:
+                entry["score"] = data["score"]
+    if isFound == False:
+        dataToFile.append(data)
+    dataToFile.sort(key=lambda entry: entry['score'], reverse=True)
+    with open('leaderboard.json', 'w') as f:
+        json.dump(dataToFile, f, indent=4)
+
+def SendDataForLeaderboard(self):
+    self.send_response(200)
+    self.send_header('Content-type', 'application/json')
+    self.end_headers()
+    with open("leaderboard.json", "r") as f:
+        data = f.read()
+    self.wfile.write(data.encode('utf-8'))
 
 
-""" thread = threading.Thread(target=handle_client, args=(communication_socket, client_address))
-    thread.start() """
-    
+if __name__ == '__main__':
+    from sys import argv
+
+    if len(argv) == 2:
+        run(port=int(argv[1]))
+    else:
+        run()
+
+# def checkExistingUser():
