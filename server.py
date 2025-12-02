@@ -16,28 +16,39 @@ import json
 
 
 class S(BaseHTTPRequestHandler):
+    global firstTimeUser
+    firstTimeUser = True
+    global realUserName
+    realUserName = ""
     def _set_response(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
+        
 
     def do_GET(self):
+        global firstTimeUser
+        global realUserName
         logging.info("GET request,\nPath: %s\nHeaders:\n%s\n", str(self.path), str(self.headers))
         parsed_url = urlparse(self.path)
         query_string = parsed_url.query
         query_params = parse_qs(query_string)
-        print('hiiiiiii', query_params)
         file_path = parsed_url.path[1:]
         if file_path == "leaderboard":
             SendDataForLeaderboard(self)
             return
         if not file_path:
-            file_path = "signup.html" 
-
-        # if "name" in query_params:
-        #     leadReader = open("leaderboardPart.txt", "a")
-        #     leadReader.write(str(query_params["name"][0]) + ":\n")
-        #     leadReader.close()
+            file_path = "signup.html"
+        if not query_params and file_path == "index.html":
+            addNameToUML(self)
+            return
+        if "name" in query_params and firstTimeUser:
+            firstTimeUser = False
+            realUserName = str(query_params["name"][0])
+            print("All good homie")
+        elif "name" in query_params and realUserName != str(query_params["name"][0]) and not firstTimeUser:
+            print("Different user detected")
+            file_path = "badSigning.html"
         mime_type, _ = mimetypes.guess_type(file_path)
         content_type = mime_type if mime_type else 'application/octet-stream'
         
@@ -102,6 +113,16 @@ def SendDataForLeaderboard(self):
         data = f.read()
     self.wfile.write(data.encode('utf-8'))
 
+def addNameToUML(self):
+    global realUserName
+    basePath = self.path
+    if not basePath:
+            basPath = "/"
+    new_url_parameters = f"name={realUserName}"
+    new_full_url = basePath + new_url_parameters
+    self.send_response(302)
+    self.send_header('Location', new_full_url)
+    self.end_headers()
 
 if __name__ == '__main__':
     from sys import argv

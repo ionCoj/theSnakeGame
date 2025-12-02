@@ -1,14 +1,22 @@
 [
     {
+        "player": "iti",
+        "score": 25
+    },
+    {
+        "player": "ion",
+        "score": 10
+    },
+    {
+        "player": "barak",
+        "score": 9
+    },
+    {
         "player": "beatos",
         "score": 5
     },
     {
         "player": "zuli",
         "score": 3
-    },
-    {
-        "player": "ion",
-        "score": 2
     }
 ]
