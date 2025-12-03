@@ -20,12 +20,7 @@ class S(BaseHTTPRequestHandler):
     firstTimeUser = True
     global realUserName
     realUserName = ""
-    def _set_response(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
         
-
     def do_GET(self):
         global firstTimeUser
         global realUserName
@@ -45,9 +40,7 @@ class S(BaseHTTPRequestHandler):
         if "name" in query_params and firstTimeUser:
             firstTimeUser = False
             realUserName = str(query_params["name"][0])
-            print("All good homie")
         elif "name" in query_params and realUserName != str(query_params["name"][0]) and not firstTimeUser:
-            print("Different user detected")
             file_path = "badSigning.html"
         mime_type, _ = mimetypes.guess_type(file_path)
         content_type = mime_type if mime_type else 'application/octet-stream'
@@ -116,8 +109,6 @@ def SendDataForLeaderboard(self):
 def addNameToUML(self):
     global realUserName
     basePath = self.path
-    if not basePath:
-            basPath = "/"
     new_url_parameters = f"name={realUserName}"
     new_full_url = basePath + new_url_parameters
     self.send_response(302)
@@ -131,5 +122,3 @@ if __name__ == '__main__':
         run(port=int(argv[1]))
     else:
         run()
-
-# def checkExistingUser():
