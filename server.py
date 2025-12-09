@@ -12,36 +12,33 @@ from urllib.parse import urlparse
 import mimetypes 
 from urllib.parse import parse_qs
 import json
-
-
+import uuid
+import http.cookies
 
 class S(BaseHTTPRequestHandler):
-    global firstTimeUser
-    firstTimeUser = True
-    global realUserName
-    realUserName = ""
         
     def do_GET(self):
-        global firstTimeUser
-        global realUserName
         logging.info("GET request,\nPath: %s\nHeaders:\n%s\n", str(self.path), str(self.headers))
         parsed_url = urlparse(self.path)
         query_string = parsed_url.query
         query_params = parse_qs(query_string)
         file_path = parsed_url.path[1:]
+
         if file_path == "leaderboard":
             SendDataForLeaderboard(self)
             return
+        
         if not file_path:
             file_path = "signup.html"
-        if not query_params and file_path == "index.html":
-            addNameToUML(self)
-            return
-        if "name" in query_params and firstTimeUser:
-            firstTimeUser = False
-            realUserName = str(query_params["name"][0])
-        elif "name" in query_params and realUserName != str(query_params["name"][0]) and not firstTimeUser:
-            file_path = "badSigning.html"
+
+        if query_params and file_path == "index.html":
+             RemoveNameUML(self)
+             return
+        
+        if file_path == "index.html":
+            if not checkValidSignup(self):
+                file_path = "badSigning.html"
+
         mime_type, _ = mimetypes.guess_type(file_path)
         content_type = mime_type if mime_type else 'application/octet-stream'
         
@@ -106,14 +103,27 @@ def SendDataForLeaderboard(self):
         data = f.read()
     self.wfile.write(data.encode('utf-8'))
 
-def addNameToUML(self):
-    global realUserName
-    basePath = self.path
-    new_url_parameters = f"name={realUserName}"
-    new_full_url = basePath + new_url_parameters
+def RemoveNameUML(self):
+    basePath = urlparse(self.path)
+    newURL = basePath.scheme + basePath.netloc + basePath.path
     self.send_response(302)
-    self.send_header('Location', new_full_url)
+    self.send_header('Location', newURL)
     self.end_headers()
+
+def checkValidSignup(self):
+    referer_url = self.headers.get('Referer')
+    if referer_url != "http://127.0.0.1:8080/" and referer_url != "http://127.0.0.1:8080/leaderboard.html" and referer_url != 'http://127.0.0.1:8080/signup.html':
+        return False
+    return True
+
+def generateRandomId(self):
+    idCookie = str(uuid.uuid4())
+    cookie = http.cookies.SimpleCookie()
+    cookie['session_id'] = idCookie
+    cookie['session_id']['path'] = '/'
+    cookie['session_id']['httponly'] = True
+    self.send_header("Set-Cookie", cookie.output(header='', sep=''))
+
 
 if __name__ == '__main__':
     from sys import argv

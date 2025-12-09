@@ -17,6 +17,7 @@ let foodX = (Math.floor(Math.random() * total))*blockSize;
 let foodY = (Math.floor(Math.random() * total))*blockSize;
 let canvas;
 let ctx;
+let signOutBtn = document.getElementById("logOut");
 
 
 window.onload = function() {
@@ -145,13 +146,19 @@ function keyDown(event){
     rightPressed = false;
   }
 }
+
+signOutBtn.addEventListener('click',()=>{
+  document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  window.location.href = 'signup.html';
+})
+
 function SendToLeaderboard(){
  const submitData = {
-    player: localStorage.getItem('userName'),
+    player: getCookie('username') || 'Anonymous',
     score: score
   };
 
-  const response = fetch('${API_BASE_URL}/leaderboard', {
+  const response = fetch('/leaderboard', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -159,5 +166,16 @@ function SendToLeaderboard(){
     body: JSON.stringify(submitData)
   });
  }
+ function getCookie(name) {
+    let cookieArr = document.cookie.split(";");
+    let result = null;
+    cookieArr.forEach(cookie => {
+      if(cookie.indexOf(name) == 0) {
+        result = cookie.substring(name.length + 1);
+      }
+    })
+    return result;
+  }
+
 
 

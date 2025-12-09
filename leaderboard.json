@@ -1,11 +1,15 @@
 [
     {
+        "player": "s",
+        "score": 100
+    },
+    {
         "player": "iti",
         "score": 25
     },
     {
         "player": "ion",
-        "score": 10
+        "score": 15
     },
     {
         "player": "barak",
@@ -16,7 +20,15 @@
         "score": 5
     },
     {
+        "player": "hacker",
+        "score": 5
+    },
+    {
         "player": "zuli",
+        "score": 3
+    },
+    {
+        "player": "yossi",
         "score": 3
     }
 ]
