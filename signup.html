@@ -18,9 +18,28 @@
   </div>
   <script>
     const submitButton = document.getElementById("submit-button");
-    submitButton.addEventListener("click", ()=>{
-      const userName = document.getElementById("firstname-input").value;
+    submitButton.addEventListener("click",async (e)=>{
+      e.preventDefault();
+      userName = document.getElementById("firstname-input").value;
+      userNameText = document.getElementById("firstname-input")
+      const response = fetch('/newUser', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(userName)
+    });
+    let myResponse = await response;
+    console.log(await myResponse.json());
+    if (myResponse.status === 201) {
+      console.log("User successfully signed up.");
       setCookie("username", userName, 7);
+      window.location.href = '/index.html';
+    } else if(myResponse.status ===  507){
+      console.error("user already exists!.");
+      userNameText.value = "";
+      userNameText.placeholder = "User already exists!";
+    }
     });
     function setCookie(name, value, days) {
       let expires = "";

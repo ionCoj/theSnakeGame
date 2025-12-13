@@ -1,34 +1,17 @@
 [
     {
-        "player": "s",
-        "score": 100
-    },
-    {
-        "player": "iti",
-        "score": 25
-    },
-    {
-        "player": "ion",
-        "score": 15
-    },
-    {
+        "ID": "9e4372bb-bbda-42d6-8c1b-902348d30681",
         "player": "barak",
-        "score": 9
+        "score": 6
     },
     {
-        "player": "beatos",
-        "score": 5
+        "ID": "9e4372bb-bbda-42d6-8c1b-902348d30681",
+        "player": "ion",
+        "score": 2
     },
     {
+        "ID": "9e4372bb-bbda-42d6-8c1b-902348d30680",
         "player": "hacker",
-        "score": 5
-    },
-    {
-        "player": "zuli",
-        "score": 3
-    },
-    {
-        "player": "yossi",
-        "score": 3
+        "score": 0
     }
 ]

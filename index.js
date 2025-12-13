@@ -27,6 +27,7 @@ window.onload = function() {
   ctx = canvas.getContext('2d');
   clearScreen(0, 0, canvas.width, canvas.height);
   setInterval(drawGame, 1000/10);
+  welcomeUser();
 }
 
 function drawGame(){
@@ -36,8 +37,27 @@ function drawGame(){
   boundryCheck();
 }
 
-function updateScore(){
+async function updateScore(){
   if(snakeX == foodX && snakeY == foodY){
+    let foodQuordinate = {x:foodX,y:foodY,username:getCookie('username'),id:getCookie('session_id')};
+    console.log(foodQuordinate);
+    const response = fetch('/foodEaten', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(foodQuordinate)
+    });
+    let myResponse = await response;
+    console.log(await myResponse.json());
+    if (myResponse.status === 201) {
+      console.log("added score");
+      window.location.href = '/index.html';
+    } else if(myResponse.status ===  507){
+      console.error("failed to add score.");
+      userNameText.value = "";
+      userNameText.placeholder = "User already exists!";
+    }
     score += 1;
     clearScreen(foodX, foodY, snakeLength, snakeWidth);
     snakeParts.push([foodX, foodY]);
@@ -58,7 +78,7 @@ function boundryCheck(){
   }
 
 function resetGame(){
-  alert("Game Over!" + "\nYour Score: " + score);
+  // alert("Game Over!" + "\nYour Score: " + score);
   snakeX = 50;
   snakeY = 50;
   length = 20;
@@ -155,7 +175,7 @@ signOutBtn.addEventListener('click',()=>{
 function SendToLeaderboard(){
  const submitData = {
     player: getCookie('username') || 'Anonymous',
-    score: score
+    ID: getCookie('session_id') || 'NoID',
   };
 
   const response = fetch('/leaderboard', {
@@ -167,15 +187,20 @@ function SendToLeaderboard(){
   });
  }
  function getCookie(name) {
-    let cookieArr = document.cookie.split(";");
-    let result = null;
-    cookieArr.forEach(cookie => {
-      if(cookie.indexOf(name) == 0) {
-        result = cookie.substring(name.length + 1);
-      }
-    })
-    return result;
+  const cookies = document.cookie.split(";");
+  for (let cookie of cookies) {
+    cookie = cookie.trim();
+    if (cookie.startsWith(name + "=")) {
+      return cookie.substring(name.length + 1);
+    }
   }
+  return null;
+}
+function welcomeUser(){
+  const username = getCookie('username') || 'Guest';
+  const welcomeElement = document.getElementById('welcomeUser');
+  welcomeElement.textContent = `Welcome, ${username}!`;
+}
 
 
 
