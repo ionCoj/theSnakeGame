@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>log in</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+  <div class="wraper">
+    <h1>Log In</h1>
+    <form action="{{  url_for('login')  }}" method="post">
+      <div>
+        {{ form.csrf_token }}
+        <p>{{ form.username.label  }}  {{  form.username()  }}</p>
+        <p>{{  form.password.label}}  {{  form.password()  }}</p>
+      </div>
+        <button type = "submit" id = "submit-button">LogIn</button>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class="flashes">
+            {% for message in messages %}
+              <li>
+               {{ message }}
+              </li>
+            {% endfor %}
+            </ul>
+  {% endif %}
+{% endwith %}
+    </form>
+    <div class="signup-link-container">
+    <p>Want to sign up?</p>
+    <a href="{{ url_for('register') }}" class="register-button">
+        Go to Register
+    </a>
+    </div>
+  </div>
+  <script>
+    
+  </script>
+</body>
+</html>

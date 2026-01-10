@@ -17,7 +17,6 @@ let foodX = (Math.floor(Math.random() * total))*blockSize;
 let foodY = (Math.floor(Math.random() * total))*blockSize;
 let canvas;
 let ctx;
-let signOutBtn = document.getElementById("logOut");
 
 
 window.onload = function() {
@@ -27,38 +26,33 @@ window.onload = function() {
   ctx = canvas.getContext('2d');
   clearScreen(0, 0, canvas.width, canvas.height);
   setInterval(drawGame, 1000/10);
-  welcomeUser();
 }
 
 function drawGame(){
   drawFood();
-  updateScore();
+  SendToServerPointAquired();
   drawSnake();
   boundryCheck();
 }
 
-async function updateScore(){
+async function SendToServerPointAquired(){
   if(snakeX == foodX && snakeY == foodY){
-    let foodQuordinate = {x:foodX,y:foodY,username:getCookie('username'),id:getCookie('session_id')};
-    console.log(foodQuordinate);
-    const response = fetch('/foodEaten', {
+    fetch('/validatescore', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(foodQuordinate)
+      }
+    })
+    .then(response => {
+      if(response.status === 200){
+        console.log("Score updated successfully");
+        score += 1;
+      }
+      else{
+        console.error("Error updating score");
+      }
     });
-    let myResponse = await response;
-    console.log(await myResponse.json());
-    if (myResponse.status === 201) {
-      console.log("added score");
-      window.location.href = '/index.html';
-    } else if(myResponse.status ===  507){
-      console.error("failed to add score.");
-      userNameText.value = "";
-      userNameText.placeholder = "User already exists!";
-    }
-    score += 1;
+
     clearScreen(foodX, foodY, snakeLength, snakeWidth);
     snakeParts.push([foodX, foodY]);
     foodX = Math.floor(Math.random() * total)*blockSize;
@@ -78,7 +72,6 @@ function boundryCheck(){
   }
 
 function resetGame(){
-  // alert("Game Over!" + "\nYour Score: " + score);
   snakeX = 50;
   snakeY = 50;
   length = 20;
@@ -86,11 +79,10 @@ function resetGame(){
   upPressed = false;
   leftPressed = false;
   rightPressed = false;
-  SendToLeaderboard();
+  UpdateScore();
   score = 0;
   snakeParts = [];
   clearScreen(0, 0, canvas.width, canvas.height);
-  window.location.href = 'leaderboard.html';
 }
 
 function clearScreen(xToClear, yToClear , heightToRem, WidthToRem){
@@ -98,7 +90,8 @@ ctx.fillStyle = 'black';
 ctx.fillRect(xToClear, yToClear, heightToRem, WidthToRem);
 }
 
-function drawSnake(){
+function drawSnake()
+{
   for (let i = 0; i < snakeParts.length; i++) {
     clearScreen(snakeParts[i][0], snakeParts[i][1], snakeLength,snakeWidth);
   }
@@ -167,40 +160,21 @@ function keyDown(event){
   }
 }
 
-signOutBtn.addEventListener('click',()=>{
-  document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-  window.location.href = 'signup.html';
-})
-
-function SendToLeaderboard(){
- const submitData = {
-    player: getCookie('username') || 'Anonymous',
-    ID: getCookie('session_id') || 'NoID',
-  };
-
-  const response = fetch('/leaderboard', {
+function UpdateScore()
+{
+  fetch('/updatescore', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(submitData)
-  });
- }
- function getCookie(name) {
-  const cookies = document.cookie.split(";");
-  for (let cookie of cookies) {
-    cookie = cookie.trim();
-    if (cookie.startsWith(name + "=")) {
-      return cookie.substring(name.length + 1);
     }
-  }
-  return null;
+  })
+.then(response => {
+    if(response.status === 200){
+      console.log("Score updated successfully");
+      window.location.href = 'leaderboard';
+    }
+    else{
+      console.log("Error updating score");
+    }
+});
 }
-function welcomeUser(){
-  const username = getCookie('username') || 'Guest';
-  const welcomeElement = document.getElementById('welcomeUser');
-  welcomeElement.textContent = `Welcome, ${username}!`;
-}
-
-
-
