@@ -151,9 +151,9 @@ def CreateCookiesForUser(user):
     login_user(user)
     print(f"User {user.username} logged in successfully.")
     return redirect(url_for('playgame'))
-    
-app = create_app()
+
 login_manager = LoginManager()
+app = create_app()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
